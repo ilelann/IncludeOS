@@ -16,6 +16,9 @@
 #ifndef VIRTIO_VIRTIO_HPP
 #define VIRTIO_VIRTIO_HPP
 
+// update_avail_idx is testing ARCH_x86
+#include <arch.hpp>
+
 #include "../hw/pci_device.hpp"
 #include <net/inet_common.hpp>
 #include <stdint.h>

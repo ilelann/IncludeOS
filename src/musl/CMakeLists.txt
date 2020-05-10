@@ -49,5 +49,10 @@ set(MUSL_OBJECTS
 )
 
 add_library(musl_syscalls STATIC ${MUSL_OBJECTS})
+target_link_libraries(musl_syscalls PRIVATE
+    includeos_impl
+    includeos_libcxx
+    includeos_libc
+)
 
 install(TARGETS musl_syscalls DESTINATION lib)

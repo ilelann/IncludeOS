@@ -77,7 +77,7 @@ void os::reboot() noexcept {}
 void __x86_init_paging(void*){};
 namespace x86 {
 namespace paging {
-  void invalidate(void* pageaddr){};
+  void invalidate(void* /*pageaddr*/){};
 }}
 
 //void OS::multiboot(unsigned) {}
@@ -105,12 +105,12 @@ uintptr_t _TEXT_END_;
 uintptr_t _EXEC_END_;
 
 extern "C" {
-  uintptr_t get_cpu_esp() {
-    return 0xdeadbeef;
-  }
+uintptr_t get_cpu_esp() {
+  return 0xdeadbeef;
+ }
 
 /// C ABI ///
-  void _init_c_runtime() {}
+void _init_c_runtime() {}
   void _init_bss() {}
 
 #ifdef __MACH__
@@ -148,7 +148,20 @@ extern "C" {
 /// platform ///
 void* __multiboot_addr;
 
-void __platform_init() {}
+#include <smp>
+void __platform_init() {
+    // resize up all PER-CPU structures
+    for (auto& lambda : kernel::smp_global_init) { lambda(); }
+}
+
+static struct platform_initer
+{
+    platform_initer()
+    {
+        __platform_init();
+    }
+} turn_it_on;
+
 extern "C" void __init_sanity_checks() {}
 extern "C" void kernel_sanity_checks() {}
 
@@ -186,6 +199,7 @@ void SMP::global_lock() noexcept {}
 void SMP::global_unlock() noexcept {}
 void SMP::add_task(SMP::task_func func, int) { func(); }
 void SMP::signal(int) {}
+size_t SMP::early_cpu_total() noexcept { return 1u; }
 
 extern "C"
 void (*current_eoi_mechanism) () = nullptr;
@@ -219,7 +233,7 @@ namespace os {
     return "unittests";
   }
 
-  void print(const char* ptr, const size_t len) {
+  void print(const char* /*ptr*/, const size_t /*len*/) {
     // print?
   }
 
@@ -258,11 +272,13 @@ namespace kernel {
 
   struct State {};
 
-
   State& state() {
     static State s{};
     return s;
   }
+
+  Fixed_vector<delegate<void()>, 64> smp_global_init(Fixedvector_Init::UNINIT);
+
 }
 
 #endif

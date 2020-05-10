@@ -12,3 +12,8 @@ set(SRCS
 
 
 add_library(hw OBJECT ${SRCS})
+target_link_libraries(hw PRIVATE
+    includeos_impl
+    includeos_libcxx
+    includeos_libc
+)

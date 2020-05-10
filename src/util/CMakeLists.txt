@@ -19,10 +19,18 @@ if (NOT ${PLATFORM} STREQUAL "nano")
     uri.cpp #rapidjson
     autoconf.cpp
     config.cpp
-    statman_liu.cpp
+    #statman_liu.cpp
   )
 endif()
 
 
 
 add_library(util OBJECT ${SRCS})
+target_link_libraries(util PRIVATE
+    includeos_impl
+    uzlib
+    rapidjson
+    http-parser
+    includeos_libc
+    includeos_libcxx
+)

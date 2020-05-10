@@ -1,5 +1,6 @@
 #include "apic_revenant.hpp"
 #include "apic.hpp"
+#include "sched.h"
 #include "apic_timer.hpp"
 #include "clocks.hpp"
 #include "idt.hpp"

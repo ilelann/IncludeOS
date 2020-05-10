@@ -1,32 +1,32 @@
-if(${ARCH} STREQUAL "x86_64")
+if (${ARCH} STREQUAL "x86_64")
   set(OPENSSL_MODULES
-    openssl/init.cpp
-    openssl/client.cpp
-    openssl/server.cpp
-    openssl/tls_stream.cpp
-    https/openssl_server.cpp
-    http/client.cpp
-    https/s2n_server.cpp
-  )
+      openssl/init.cpp
+      openssl/client.cpp
+      openssl/server.cpp
+      openssl/tls_stream.cpp
+      https/openssl_server.cpp
+      http/client.cpp
+      https/s2n_server.cpp
+      )
   #TODO get from conan
   set(OPENSSL_LIBS
-    s2n_libs2n
-    s2n_libssl
-    s2n_crypto
-  )
-endif()
+      s2n_libs2n
+      s2n_libssl
+      s2n_crypto
+      )
+endif ()
 
 set(BOTAN_MODULES
-  https/botan_server.cpp
-)
+    https/botan_server.cpp
+    )
 
-SET(ETH_SRCS
-     ethernet/ethernet.cpp
-     ethernet/ethernet_8021q.cpp
-     )
+set(ETH_SRCS
+    ethernet/ethernet.cpp
+    ethernet/ethernet_8021q.cpp
+    )
 
 
-SET(IP4_SRCS
+set(IP4_SRCS
     ip4/arp.cpp
     ip4/ip4.cpp
     ip4/reassembly.cpp
@@ -34,22 +34,21 @@ SET(IP4_SRCS
     )
 
 
+set(IP6_SRCS
+    ip6/addr.cpp
+    ip6/addr_list.cpp
+    ip6/ip6.cpp
+    ip6/icmp6.cpp
+    ip6/ndp.cpp
+    ip6/mld.cpp
+    ip6/extension_header.cpp
+    #net/ip6/packet_ndp.cpp
+    #net/ip6/packet_mld.cpp
+    ip6/slaac.cpp
+    )
 
-SET(IP6_SRCS
-  ip6/addr.cpp
-  ip6/addr_list.cpp
-  ip6/ip6.cpp
-  ip6/icmp6.cpp
-  ip6/ndp.cpp
-  ip6/mld.cpp
-  ip6/extension_header.cpp
-  #net/ip6/packet_ndp.cpp
-  #net/ip6/packet_mld.cpp
-  ip6/slaac.cpp
-  )
 
-
-SET(TCP_SRCS
+set(TCP_SRCS
     tcp/tcp.cpp
     tcp/connection.cpp
     tcp/connection_states.cpp
@@ -61,10 +60,10 @@ SET(TCP_SRCS
     tcp/stream.cpp
     tcp/tcp_conntrack.cpp
     )
-SET(UDP_SRCS
+set(UDP_SRCS
     udp/udp.cpp
     udp/socket.cpp
-  )
+    )
 
 set(HTTP_SRCS
     http/header.cpp
@@ -85,7 +84,7 @@ set(HTTP_SRCS
     )
 
 
-SET(DHCP_SRCS
+set(DHCP_SRCS
     dhcp/dh4client.cpp
     dhcp/dhcpd.cpp
     )
@@ -114,34 +113,56 @@ set(SRCS
     vlan_manager.cpp
     addr.cpp
     ws/websocket.cpp
-)
+    )
 
 #TODO figure out if cmake can do multilevel objects somehow
 #or maybe calling this will return a list of objects..
-SET(OBJLIST
-        ${NET_SRCS}
-        ${ETH_SRCS}
-        ${IP4_SRCS}
-        ${IP6_SRCS}
-        ${TCP_SRCS}
-        ${UDP_SRCS}
-        ${NAT_SRCS}
-        ${DNS_SRCS}
-        ${DHCP_SRCS}
+set(OBJLIST
+    ${NET_SRCS}
+    ${ETH_SRCS}
+    ${IP4_SRCS}
+    ${IP6_SRCS}
+    ${TCP_SRCS}
+    ${UDP_SRCS}
+    ${NAT_SRCS}
+    ${DNS_SRCS}
+    ${DHCP_SRCS}
     )
-#TODO what else can we strip away from net?
+
 if (NOT ${PLATFORM} STREQUAL "nano")
   list(APPEND OBJLIST ${HTTP_SRCS})
-  if (NOT CMAKE_TESTING_ENABLED)
-    list(APPEND OBJLIST
-      ${BOTAN_MODULES}
-      ${OPENSSL_MODULES}
-    )
-    list(APPEND SRCS
+  set(MOCKABLE_SRCS
+      # TODO restore liveupdate
+      #${BOTAN_MODULES}
+      #${OPENSSL_MODULES}
       configure.cpp
+      )
+endif ()
+
+add_library(net OBJECT ${SRCS} ${OBJLIST} ${MOCKABLE_SRCS})
+target_link_libraries(net PRIVATE
+    includeos_impl
+    rapidjson
+    http-parser
+    # TODO restore liveupdate
+    #botan
+    #s2n
+    #OpenSSL::SSL
+    includeos_libcxx
+    includeos_libc
     )
-  endif()
-endif()
+target_compile_options(net PRIVATE -Wno-return-type -Wno-deprecated-declarations)
 
-
-add_library(net OBJECT ${SRCS} ${OBJLIST})
+add_library(net_mockable OBJECT ${SRCS} ${OBJLIST})
+target_link_libraries(net_mockable PRIVATE
+    includeos_impl
+    rapidjson
+    http-parser
+    # TODO restore liveupdate
+    #botan
+    #s2n
+    #OpenSSL::SSL
+    includeos_libcxx
+    includeos_libc
+    )
+target_compile_options(net_mockable PRIVATE -Wno-return-type -Wno-deprecated-declarations)

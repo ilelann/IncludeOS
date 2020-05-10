@@ -107,11 +107,14 @@ Stat& Statman::get_by_name(const char* name)
   //stlock.lock();
   for (auto& stat : this->m_stats)
   {
-    if (stat.unused() == false) {
+    if (stat.unused() == false)
+    {
       if (strncmp(stat.name(), name, Stat::MAX_NAME_LEN) == 0)
-        //stlock.unlock();
-        printf("Unlocked (found): this=%p, lock=%p, %d\n", this, &stlock, *(spinlock_t*) &stlock);
-        return stat;
+      {
+          //stlock.unlock();
+          printf("Unlocked (found): this=%p, lock=%p, %d\n", this, &stlock, *(spinlock_t *) &stlock);
+          return stat;
+      }
     }
   }
   //stlock.unlock();
@@ -145,7 +148,8 @@ void Statman::free(void* addr)
 
 ssize_t Statman::find_free_stat() const noexcept
 {
-  for (size_t i = 0; i < this->m_stats.size(); i++)
+  using size_type = decltype (this->m_stats.size());
+  for (size_type i = 0; i < this->m_stats.size(); i++)
   {
     if (m_stats[i].unused()) return i;
   }

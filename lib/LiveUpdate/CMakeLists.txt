@@ -1,57 +1,8 @@
-cmake_minimum_required(VERSION 2.8.9)
-set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
-project(includeos C CXX)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(PROFILE "Compile with startup profilers" OFF)
 if (PROFILE)
   add_definitions(-DENABLE_PROFILERS)
 endif()
-
-if (NOT ARCH)
-  set(ARCH ${CMAKE_SYSTEM_PROCESSOR})
-endif()
-
-if (NOT CMAKE_TESTING_ENABLED)
-  if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
-    include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
-    conan_basic_setup()
-  else()
-    if (NOT CMAKE_BUILD_TYPE)
-      set(CMAKE_BUILD_TYPE Release)
-    endif()
-    if (CONAN_PROFILE)
-      set(CONANPROFILE PROFILE ${CONAN_PROFILE})
-    endif()
-    if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
-       message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
-       file(DOWNLOAD "https://github.com/conan-io/cmake-conan/raw/v0.13/conan.cmake"
-                     "${CMAKE_BINARY_DIR}/conan.cmake")
-    endif()
-    include(${CMAKE_BINARY_DIR}/conan.cmake)
-    conan_cmake_run(
-      CONANFILE conanfile.py
-      BASIC_SETUP
-      ${CONANPROFILE}
-    )
-  endif()
-  #only on x86_64
-  enable_language(ASM_NASM)
-  add_definitions(-D__includeos__)
-endif()
-
-include_directories(
-  include
-  ../../src/include
-)
-
-#do we need all of this*?
-add_definitions(-DARCH_${ARCH})
-add_definitions(-DARCH="${ARCH}")
-add_definitions(-DPLATFORM_${PLATFORM})
 
 set(TRIPLE "${ARCH}-pc-linux-elf")
 set(CMAKE_CXX_COMPILER_TARGET ${TRIPLE})
@@ -93,10 +44,11 @@ if (NOT CMAKE_TESTING_ENABLED)
   add_dependencies(liveupdate hotswap64)
 endif()
 set_target_properties(liveupdate PROPERTIES PUBLIC_HEADER "include/liveupdate;include/liveupdate.hpp")
-target_compile_options(liveupdate PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-nostdlib -nostdlibinc>)
 target_compile_options(liveupdate PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -fstack-protector>)
 target_compile_options(liveupdate PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-ffunction-sections -fdata-sections>)
-
+target_include_directories(liveupdate PRIVATE include)
+target_compile_options(liveupdate PRIVATE -Wno-unused-variable)
+target_link_libraries(liveupdate PRIVATE s2n includeos_impl)
 INSTALL(TARGETS liveupdate
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib

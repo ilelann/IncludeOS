@@ -12,8 +12,8 @@ void abort(){
 }
 #endif
 
-const char* service_name__ = SERVICE_NAME;
-const char* service_binary_name__ = SERVICE;
+//const char* service_name__ = SERVICE_NAME;
+//const char* service_binary_name__ = SERVICE;
 
 namespace os {
     uintptr_t liveupdate_memory_size_mb = _LIVEUPDATE_MEMSIZE_;

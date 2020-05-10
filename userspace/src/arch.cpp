@@ -49,32 +49,37 @@ void __arch_system_deactivate()
   // nada
 }
 
-#ifdef __linux__
-#include <execinfo.h>
-#endif
+//#ifdef __linux__
+//#if __has_include(<execinfo.h>)
+//#include <execinfo.h>
+//#endif
+//#endif
+
 void os::print_backtrace() noexcept
 {
   static const int NUM_ADDRS = 64;
   void*  addresses[NUM_ADDRS];
 
-#ifdef __linux__
-  int nptrs = backtrace(addresses, NUM_ADDRS);
-  printf("backtrace() returned %d addresses\n", nptrs);
-
-  /* The call backtrace_symbols_fd(buffer, nptrs, STDOUT_FILENO)
-     would produce similar output to the following: */
-
-  char** strings = backtrace_symbols(addresses, nptrs);
-  if (strings == NULL) {
-    perror("backtrace_symbols");
-    exit(EXIT_FAILURE);
-  }
-
-  for (int j = 0; j < nptrs; j++)
-      printf("#%02d: %8p %s\n", j, addresses[j], strings[j]);
-
-  free(strings);
-#endif
+//#ifdef __linux__
+//#if __has_include(<execinfo.h>)
+//  int nptrs = backtrace(addresses, NUM_ADDRS);
+//  printf("backtrace() returned %d addresses\n", nptrs);
+//
+//  /* The call backtrace_symbols_fd(buffer, nptrs, STDOUT_FILENO)
+//     would produce similar output to the following: */
+//
+//  char** strings = backtrace_symbols(addresses, nptrs);
+//  if (strings == NULL) {
+//    perror("backtrace_symbols");
+//    exit(EXIT_FAILURE);
+//  }
+//
+//  for (int j = 0; j < nptrs; j++)
+//      printf("#%02d: %8p %s\n", j, addresses[j], strings[j]);
+//
+//  free(strings);
+//#endif
+//#endif
 }
 
 // context buffer

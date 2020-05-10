@@ -1,5 +1,4 @@
 #include <smp_utils>
-#include <smp>
 
 void smp_spinlock::lock()
 {

@@ -1,9 +1,14 @@
+enable_language(ASM_NASM)
+
+set(CMAKE_ASM_NASM_COMPILE_OBJECT "<CMAKE_ASM_NASM_COMPILER> -felf64 -o <OBJECT> <SOURCE>")
+
 set(SRCS
     block.cpp
     cpuid.cpp
     elf.cpp
     events.cpp
-    fiber.cpp
+    # TODO requires <atomic>
+    #fiber.cpp
     memmap.cpp
     multiboot.cpp
     os.cpp
@@ -13,9 +18,6 @@ set(SRCS
     #scoped_profiler.cpp
     smp_common.cpp
     smp_utils.cpp
-#    elf.cpp
-  #  fiber.cpp
-#    profile.cpp
     terminal.cpp
     timers.cpp
     threads.cpp
@@ -25,8 +27,8 @@ set(SRCS
     context.cpp
     #context_asm.asm
     )
-if (NOT CMAKE_TESTING_ENABLED)
-  list(APPEND SRCS
+
+set(MOCKABLE_SRCS
   #  rdrand.cpp
     heap.cpp
     kernel.cpp
@@ -34,7 +36,6 @@ if (NOT CMAKE_TESTING_ENABLED)
     rtc.cpp
     system_log.cpp
   )
-endif()
 
 if("${ARCH}" STREQUAL "x86_64" OR "${ARCH}" STREQUAL "i686")
   list(APPEND SRCS
@@ -43,4 +44,16 @@ if("${ARCH}" STREQUAL "x86_64" OR "${ARCH}" STREQUAL "i686")
   )
 endif()
 
-add_library(kernel OBJECT ${SRCS})
+add_library(kernel OBJECT ${SRCS} ${MOCKABLE_SRCS})
+target_link_libraries(kernel PRIVATE
+    includeos_impl
+    includeos_libcxx
+    includeos_libc
+)
+
+add_library(kernel_mockable OBJECT ${SRCS})
+target_link_libraries(kernel_mockable PRIVATE
+    includeos_impl
+    includeos_libcxx
+    includeos_libc
+    )

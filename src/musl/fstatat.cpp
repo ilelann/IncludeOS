@@ -3,6 +3,9 @@
 
 #include <posix/fd_map.hpp>
 
+// for PATH_MAX
+#include <limits.h>
+
 long sys_getcwd(char *buf, size_t size);
 long sys_stat(const char *path, struct stat *buf);
 

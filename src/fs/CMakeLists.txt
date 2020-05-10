@@ -12,3 +12,9 @@ SET(SRCS
     )
 
 add_library(fs OBJECT ${SRCS})
+target_link_libraries(fs PRIVATE
+    arch
+    includeos_impl
+    includeos_libcxx
+    includeos_libc
+)

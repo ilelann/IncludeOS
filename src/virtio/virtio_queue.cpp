@@ -159,9 +159,7 @@ bool Virtio::Queue::interrupts_enabled() const noexcept {
 void Virtio::Queue::kick()
 {
   update_avail_idx();
-#if defined (PLATFORM_UNITTEST)
-  // do nothing here
-#elif defined(ARCH_x86)
+#if defined(ARCH_x86)
   // Std. §3.2.1 pt. 4
   __arch_hw_barrier();
   if (!(_queue.used->flags & VIRTQ_USED_F_NO_NOTIFY)){

@@ -121,6 +121,9 @@ using namespace http;
     EXPECT_THROWS( (Cookie{"name", "value", {"Expires", "Sun, 06 Nov 1994 08:49:37 GMT", "Path", "/something123", "Domain"}}) );
   }
 
+// TODO fails because musl does not seem to support '%Z'
+// used by to_time_t
+// see https://www.openwall.com/lists/musl/2017/04/19/2
   CASE("No CookieException thrown when creating Cookie with multiple valid options")
   {
     EXPECT_NO_THROW( (Cookie{"name", "value", {"Expires", "Sun, 06 Nov 1994 08:49:37 GMT", "path", "/path"}}) );

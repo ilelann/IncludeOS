@@ -16,8 +16,9 @@ CASE("Virtio Queue enqueue")
 
   std::array<Virtio::Token, 2> tokens {{ token1, token2 }};
   q.enqueue(tokens);
-  // update avail idx
-  q.kick();
+  // q.kick(); would fails in tests env
+  // so instead we only do:
+  q.update_avail_idx();
 }
 
 CASE("Virtio Queue interrupts")

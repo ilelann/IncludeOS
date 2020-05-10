@@ -55,19 +55,20 @@ public:
   static size_t early_cpu_total() noexcept;
 };
 
-inline int SMP::cpu_id() noexcept
-{
-  int cpuid;
-#ifdef ARCH_x86_64
-  asm("movl %%gs:(0x0), %0" : "=r" (cpuid));
-#elif defined(ARCH_i686)
-  asm("movl %%fs:(0x0), %0" : "=r" (cpuid));
-#else
-  asm("mrs %0, mpidr_el1" : "=r" (cpuid));
-  cpuid &= 0xFF;
-#endif
-  return cpuid;
-}
+// TODO move to arch lib cpp files, inlining breaks os_mock
+//inline int SMP::cpu_id() noexcept
+//{
+//  int cpuid;
+//#ifdef ARCH_x86_64
+//  asm("movl %%gs:(0x0), %0" : "=r" (cpuid));
+//#elif defined(ARCH_i686)
+//  asm("movl %%fs:(0x0), %0" : "=r" (cpuid));
+//#else
+//  asm("mrs %0, mpidr_el1" : "=r" (cpuid));
+//  cpuid &= 0xFF;
+//#endif
+//  return cpuid;
+//}
 
 #include <array>
 template <typename T, size_t N>

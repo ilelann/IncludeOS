@@ -143,7 +143,7 @@ void SMP::init_task()
   /* do nothing */
 }
 
-void SMP::add_task(SMP::task_func task, SMP::done_func done, int cpu)
+void SMP::add_task(SMP::task_func task, SMP::done_func done, int /*cpu*/)
 {
   auto& system = PER_CPU(smp::systems);
   system.tlock.lock();

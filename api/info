@@ -27,6 +27,7 @@
 #define CENTER(TEXT,...)
 #define FILLINE(CHAR)
 #define CHECK(X,...)
+#define CHECKSERT(TEST, TEXT, ...)
 #endif
 
 #endif //< ___API_INFO___

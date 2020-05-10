@@ -100,11 +100,13 @@ CASE("net::router: Creating and using a router and routing table")
   auto route = router.get_cheapest_route({10,42,42,10});
   EXPECT((route->nexthop() == IP4::addr{10,42,42,2} and route->interface() == eth1));
 
-  // Getting the most specific route should hit the most specific one (duh)
-  route = router.get_most_specific_route({10,42,42,10});
+  {
+      // Getting the most specific route should hit the most specific one (duh)
+      auto route = router.get_most_specific_route({10, 42, 42, 10});
 
-  EXPECT(route != nullptr);
-  EXPECT(route->nexthop() == IP4::addr(10,42,42,2));
+      EXPECT(route != nullptr);
+      EXPECT(route->nexthop() == IP4::addr(10, 42, 42, 2));
+    }
 
   // Change the routing table
   router.set_routing_table( {{{10, 42, 43, 0 }, { 255, 255, 255, 0}, {10, 42, 42, 2}, *eth1 , 2 }} );

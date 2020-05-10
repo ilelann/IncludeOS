@@ -38,6 +38,8 @@ test/**/*.log
 CMakeFiles*
 CMakeCache*
 cmake_install.cmake
+# CLion default build paths
+cmake-build-*
 
 # Vim
 *.swp

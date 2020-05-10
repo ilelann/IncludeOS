@@ -151,11 +151,11 @@ namespace net {
      * Get cheapest route for a certain IP
      * @todo : Optimize!
      **/
-    Route<IPV>* get_cheapest_route(typename IPV::addr dest) {
+    std::optional<Route<IPV>> get_cheapest_route(typename IPV::addr dest) {
       Routing_table all = get_all_routes(dest);
       std::sort(all.begin(), all.end());
-      if (not all.empty()) return &all.front();
-      return nullptr;
+      if (not all.empty()) return all.front();
+      return {};
     };
 
 

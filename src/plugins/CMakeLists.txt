@@ -23,6 +23,8 @@ if (NOT ${PLATFORM} STREQUAL "nano")
   )
   #handle the more complex ones
   add_library(terminal_liu STATIC terminal.cpp)
+  target_link_libraries(terminal_liu PRIVATE GSL)
+  target_link_libraries(terminal_liu PRIVATE rapidjson)
   set_target_properties(terminal_liu PROPERTIES COMPILE_FLAGS "-DUSE_LIVEUPDATE")
   
 endif()
@@ -31,6 +33,7 @@ set(PLUGINS "")
 foreach(PLUGIN ${PLUGIN_SRCS})
   get_filename_component(PLUGIN_NAME ${PLUGIN} NAME_WE)
   add_library(${PLUGIN_NAME} STATIC ${PLUGIN})
+  target_link_libraries(${PLUGIN_NAME} PRIVATE GSL rapidjson)
   list(APPEND PLUGINS ${PLUGIN_NAME})
   install(TARGETS ${DRIVER_NAME} DESTINATION drivers)
 endforeach()
@@ -38,6 +41,7 @@ endforeach()
 add_library(field_medic STATIC
             field_medic/fieldmedic.cpp
             field_medic/diag.cpp)
+target_link_libraries(field_medic PRIVATE GSL)
 list(APPEND PLUGINS field_medic)
 
 #handle build targets for conan editable

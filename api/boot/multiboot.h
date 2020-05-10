@@ -198,8 +198,8 @@ typedef struct multiboot_info multiboot_info_t;
        multiboot_uint32_t size;
        multiboot_uint64_t addr;
        multiboot_uint64_t len;
-     #define MULTIBOOT_MEMORY_AVAILABLE              1
-     #define MULTIBOOT_MEMORY_RESERVED               2
+     #define MULTIBOOT_MEMORY_AVAILABLE              1u
+     #define MULTIBOOT_MEMORY_RESERVED               2u
        multiboot_uint32_t type;
      } __attribute__((packed));
 typedef struct multiboot_mmap_entry multiboot_memory_map_t;

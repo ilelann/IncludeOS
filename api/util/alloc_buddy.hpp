@@ -48,7 +48,7 @@ namespace os::mem::buddy {
   using Addr_t    = uintptr_t; // Use void* only at outermost api level
   using Size_t    = size_t;
   using Node_arr  = gsl::span<Node_t>;
-  using Index_t   = Node_arr::index_type;
+  using Index_t   = Node_arr::size_type;
 
   /**
    * A buddy allocator over a fixed size pool
@@ -453,12 +453,12 @@ namespace os::mem::buddy {
         return alloc_->start_addr_ != 0 and alloc_ != nullptr;
       }
 
-      Node_t& data() {
-        return alloc_->nodes_.at(i_);
+      Node_t& data() noexcept {
+        return alloc_->nodes_[i_];
       }
 
       const Node_t& data() const noexcept {
-        return alloc_->nodes_.at(i_);
+        return alloc_->nodes_[i_];
       }
 
       Addr_t allocate_self() {

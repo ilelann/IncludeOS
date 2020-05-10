@@ -57,3 +57,14 @@ CASE("Create DHCP request")
     //printf("AFT Done = %d\n", done);
   }
 }
+
+CASE("Close DHCP server")
+{
+    dhcp_server.reset(nullptr);
+}
+
+CASE("Close network")
+{
+    dev1.reset(nullptr);
+    dev2.reset(nullptr);
+}

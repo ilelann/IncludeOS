@@ -346,8 +346,14 @@ CASE ("x86::paging Verify execute protection")
     EXPECT(os::mem::flags(__exec_end - 1)   == (Access::execute | Access::read));
     EXPECT(os::mem::flags(__exec_end + 4_KiB) == (Access::read | Access::write));
 
+    srand(os::cycles_since_boot());
+
     for (int i = 0; i < 10; i++ ) {
       auto exec_start = (rand() & ~0xfff);
+      // 0 can't be mapped
+      while(exec_start == 0) {
+          exec_start = (rand() & ~0xfff);
+      }
       auto exec_end = exec_start + rand() % 100_MiB;
 
       init_default_paging(exec_start, exec_end);

@@ -5,6 +5,7 @@
 #include <common>
 #include <kprint>
 #include <errno.h>
+#include <sys/types.h>
 
 extern "C" {
   long syscall_SYS_set_thread_area(void* u_info);

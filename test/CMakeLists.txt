@@ -1,50 +1,15 @@
-cmake_minimum_required(VERSION 3.1.0)
-
-project(unittests C CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-if (NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Debug")
-endif()
+#if (NOT CMAKE_BUILD_TYPE)
+#  set(CMAKE_BUILD_TYPE "Debug")
+#endif()
 
 set(PLATFORM "userspace")
 
-if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
-  include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
-  conan_basic_setup()
-else()
-  #TODO get a released version ? or put one into root/cmake/ ?
-  if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
-     message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
-     file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/master/conan.cmake"
-                    "${CMAKE_BINARY_DIR}/conan.cmake")
-  endif()
-  ##needed by conaningans
-
-  include(${CMAKE_BINARY_DIR}/conan.cmake)
-  #include conan cmake
-  if (UPDATE)
-   set(CONAN_UPDATE UPDATE)
-  endif()
-  if (CONAN_PROFILE)
-    set(CONANPROFILE PROFILED ${CONAN_PROFILE})
-  endif()
-  conan_cmake_run(
-    CONANFILE conanfile.txt
-    BASIC_SETUP
-    ${CONAN_UPDATE}
-    ${CONANPROFILE}
-  )
-endif()
-
-if (NOT ARCH)
-  if (CONAN_SETTINGS_ARCH)
-    set(ARCH ${CONAN_SETTINGS_ARCH})
-  else()
-    set(ARCH "x86_64")
-  endif()
-endif()
-message(STATUS "Building for arch ${ARCH}")
+FetchContent_MakeAvailable(lest)
+FetchContent_GetProperties(lest SOURCE_DIR lestSourceDir)
+add_library(lest INTERFACE)
+target_include_directories(lest INTERFACE ${lestSourceDir}/include)
 
 option(COVERAGE "Build with coverage generation" OFF)
 option(SILENT_BUILD "Build with some warnings turned off" ON)
@@ -54,34 +19,29 @@ option(DEBUG_INFO "Print debug macro output when DEBUG/DEBUG2 etc. is defined in
 option(GENERATE_SUPPORT_FILES "Generate external files required by some tests (e.g. tar)" ON)
 option(EXTRA_TESTS "Build extra test" OFF)
 
-#if ("${ARCH}" STREQUAL "")
-#  message(STATUS "CMake detected host arch: ${CMAKE_HOST_SYSTEM_PROCESSOR}")
-#  set (ARCH ${CMAKE_HOST_SYSTEM_PROCESSOR})
-#endif("${ARCH}" STREQUAL "")
-
-add_definitions(-DARCH_${ARCH})
-add_definitions(-DARCH="${ARCH}")
-add_definitions(-DPLATFORM_UNITTEST)
+#add_definitions(-DARCH_${ARCH})
+#add_definitions(-DARCH="${ARCH}")
+#add_definitions(-DPLATFORM_UNITTEST)
 
 FILE(WRITE ${CMAKE_BINARY_DIR}/version.h
   "#define OS_VERSION \"v0.0.0.1\"\n"
 )
 
-include_directories(${CMAKE_BINARY_DIR})
+#include_directories(${CMAKE_BINARY_DIR})
 
-set(CMAKE_C_FLAGS "-g -O0 -std=c11 -Wall -Wextra")
+#set(CMAKE_C_FLAGS "-g -O0 -std=c11 -Wall -Wextra")
 
-set(NO_INFO "-DNO_INFO=1")
-if(INFO)
-  set(NO_INFO "")
-endif()
+#set(NO_INFO "-DNO_INFO=1")
+#if(INFO)
+#  set(NO_INFO "")
+#endif()
+#
+#set(NO_DEBUG "-DNO_DEBUG=1")
+#if (DEBUG_INFO)
+#  set(NO_DEBUG "")
+#endif()
 
-set(NO_DEBUG "-DNO_DEBUG=1")
-if (DEBUG_INFO)
-  set(NO_DEBUG "")
-endif()
-
-set(CMAKE_CXX_FLAGS "-g -O0 -march=native -std=c++17 -Wall -Wextra -Wno-unused-function -D__id_t_defined -DUNITTESTS -DURI_THROW_ON_ERROR ${NO_INFO} ${NO_DEBUG} -DGSL_THROW_ON_CONTRACT_VIOLATION -Dlest_FEATURE_AUTO_REGISTER=1 -DHAVE_LEST_MAIN")
+#set(CMAKE_CXX_FLAGS "-g -O0 -march=native -std=c++17 -Wall -Wextra -Wno-unused-function -D__id_t_defined -DUNITTESTS -DURI_THROW_ON_ERROR ${NO_INFO} ${NO_DEBUG} -DGSL_THROW_ON_CONTRACT_VIOLATION -Dlest_FEATURE_AUTO_REGISTER=1 -DHAVE_LEST_MAIN")
 
 if (COVERAGE)
   if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -110,112 +70,113 @@ endif()
 
 set(TEST ${CMAKE_CURRENT_SOURCE_DIR})
 
-include_directories(
-  ${TEST}/lest_util
-  ${TEST}/../api
-  ${TEST}/../src/include
-  #TODO move to the right place
-  ${TEST}/../lib/LiveUpdate/include
-)
+#include_directories(
+#  ${TEST}/lest_util
+#  ${TEST}/../api
+#  ${TEST}/../src/include
+#  #TODO move to the right place
+#  ${TEST}/../lib/LiveUpdate/include
+#)
 
 set(LEST_UTIL
   ${TEST}/lest_util/lestmain.cxx
-  ${TEST}/lest_util/os_mock.cpp
+  #${TEST}/lest_util/os_mock.cpp
   ${TEST}/lest_util/mock_fs.cpp
   ${TEST}/lest_util/random.cpp
 )
 
 set(TEST_SOURCES
-  ${TEST}/fs/unit/memdisk_test.cpp
-  ${TEST}/fs/unit/path_test.cpp
-  ${TEST}/fs/unit/vfs_test.cpp
-  ${TEST}/fs/unit/unit_fs.cpp
-  ${TEST}/fs/unit/unit_fat.cpp
-  #${TEST}/hw/unit/cpu_test.cpp
-  ${TEST}/hw/unit/mac_addr_test.cpp
-  ${TEST}/hw/unit/usernet.cpp
-  ${TEST}/hw/unit/virtio_queue.cpp
-  ${TEST}/kernel/unit/arch.cpp
-  ${TEST}/kernel/unit/block.cpp
-  ${TEST}/kernel/unit/cpuid.cpp
-  ${TEST}/kernel/unit/memmap_test.cpp
-  ${TEST}/kernel/unit/memory.cpp
-  ${TEST}/kernel/unit/os_test.cpp
-  ${TEST}/kernel/unit/rng.cpp
-  ${TEST}/kernel/unit/service_stub_test.cpp
-  ${TEST}/kernel/unit/test_hal.cpp
-  ${TEST}/kernel/unit/unit_events.cpp
-  ${TEST}/kernel/unit/unit_liveupdate.cpp
-  ${TEST}/kernel/unit/unit_timers.cpp
-  ${TEST}/kernel/unit/x86_paging.cpp
-  ${TEST}/net/unit/addr_test.cpp
-  ${TEST}/net/unit/bufstore.cpp
-  ${TEST}/net/unit/checksum.cpp
-  ${TEST}/net/unit/cidr.cpp
-  ${TEST}/net/unit/conntrack_test.cpp
-  ${TEST}/net/unit/cookie_test.cpp
-  ${TEST}/net/unit/dhcp.cpp
-  ${TEST}/net/unit/dhcp_message_test.cpp
-  ${TEST}/net/unit/error.cpp
-  ${TEST}/net/unit/http_header_test.cpp
-  ${TEST}/net/unit/http_status_codes_test.cpp
-  ${TEST}/net/unit/http_method_test.cpp
-  ${TEST}/net/unit/http_mime_types_test.cpp
-  ${TEST}/net/unit/http_request_test.cpp
-  ${TEST}/net/unit/http_response_test.cpp
-  ${TEST}/net/unit/http_time_test.cpp
-  ${TEST}/net/unit/http_version_test.cpp
-  ${TEST}/net/unit/interfaces_test.cpp
-  ${TEST}/net/unit/ip4_addr.cpp
-  ${TEST}/net/unit/ip4.cpp
-  ${TEST}/net/unit/ip4_packet_test.cpp
-  ${TEST}/net/unit/ip6.cpp
-  ${TEST}/net/unit/ip6_addr.cpp
-  ${TEST}/net/unit/ip6_addr_list_test.cpp
-  ${TEST}/net/unit/ip6_packet_test.cpp
-  ${TEST}/net/unit/nat_test.cpp
-  ${TEST}/net/unit/napt_test.cpp
-  ${TEST}/net/unit/packets.cpp
-  ${TEST}/net/unit/path_mtu_discovery.cpp
-  ${TEST}/net/unit/port_util_test.cpp
-  ${TEST}/net/unit/router_test.cpp
-  ${TEST}/net/unit/socket.cpp
-  ${TEST}/net/unit/stateful_addr_test.cpp
-  ${TEST}/net/unit/tcp_benchmark.cpp
-  ${TEST}/net/unit/tcp_packet_test.cpp
-  ${TEST}/net/unit/tcp_read_buffer_test.cpp
-  ${TEST}/net/unit/tcp_read_request_test.cpp
-  ${TEST}/net/unit/tcp_write_queue.cpp
-  ${TEST}/net/unit/websocket.cpp
-  ${TEST}/posix/unit/fd_map_test.cpp
-  ${TEST}/posix/unit/inet_test.cpp
-  ${TEST}/posix/unit/unit_fd.cpp
-  ${TEST}/util/unit/base64.cpp
-  ${TEST}/util/unit/bitops.cpp
-  ${TEST}/util/unit/buddy_alloc_test.cpp
-  ${TEST}/util/unit/config.cpp
-  ${TEST}/util/unit/crc32.cpp
-  ${TEST}/util/unit/delegate.cpp
-  ${TEST}/util/unit/fixed_list_alloc_test.cpp
-  ${TEST}/util/unit/fixed_queue.cpp
-  ${TEST}/util/unit/fixed_vector.cpp
-  ${TEST}/util/unit/isotime.cpp
-  ${TEST}/util/unit/logger_test.cpp
-  ${TEST}/util/unit/membitmap.cpp
-  #${TEST}/util/unit/path_to_regex_no_options.cpp
-  ${TEST}/util/unit/path_to_regex_parse.cpp
-  ${TEST}/util/unit/path_to_regex_options.cpp
-  ${TEST}/util/unit/percent_encoding_test.cpp
-  ${TEST}/util/unit/pmr_alloc_test.cpp
-  ${TEST}/util/unit/ringbuffer.cpp
-  ${TEST}/util/unit/sha1.cpp
-  ${TEST}/util/unit/statman.cpp
-  ${TEST}/util/unit/syslogd_test.cpp
-  ${TEST}/util/unit/syslog_facility_test.cpp
-  ${TEST}/util/unit/uri_test.cpp
-  ${TEST}/util/unit/lstack/test_lstack_nodes.cpp
-  ${TEST}/util/unit/lstack/test_lstack_merging.cpp
-  ${TEST}/util/unit/lstack/test_lstack_nomerge.cpp
+ # ${TEST}/fs/unit/memdisk_test.cpp
+
+#  ${TEST}/fs/unit/path_test.cpp
+#  ${TEST}/fs/unit/vfs_test.cpp
+#  ${TEST}/fs/unit/unit_fs.cpp
+#  ${TEST}/fs/unit/unit_fat.cpp
+#  #${TEST}/hw/unit/cpu_test.cpp
+#  ${TEST}/hw/unit/mac_addr_test.cpp
+#  ${TEST}/hw/unit/usernet.cpp
+#  ${TEST}/hw/unit/virtio_queue.cpp
+#  #${TEST}/kernel/unit/arch.cpp
+#  ${TEST}/kernel/unit/block.cpp
+#  ${TEST}/kernel/unit/cpuid.cpp
+#  ${TEST}/kernel/unit/memmap_test.cpp
+#  ${TEST}/kernel/unit/memory.cpp
+#  ${TEST}/kernel/unit/os_test.cpp
+#  ${TEST}/kernel/unit/rng.cpp
+#  ${TEST}/kernel/unit/service_stub_test.cpp
+#  ${TEST}/kernel/unit/test_hal.cpp
+#  ${TEST}/kernel/unit/unit_events.cpp
+#  ${TEST}/kernel/unit/unit_liveupdate.cpp
+#  ${TEST}/kernel/unit/unit_timers.cpp
+#  ${TEST}/kernel/unit/x86_paging.cpp
+#  ${TEST}/net/unit/addr_test.cpp
+#  ${TEST}/net/unit/bufstore.cpp
+#  ${TEST}/net/unit/checksum.cpp
+#  ${TEST}/net/unit/cidr.cpp
+#  ${TEST}/net/unit/conntrack_test.cpp
+#  ${TEST}/net/unit/cookie_test.cpp
+#  ${TEST}/net/unit/dhcp.cpp
+#  ${TEST}/net/unit/dhcp_message_test.cpp
+#  ${TEST}/net/unit/error.cpp
+#  ${TEST}/net/unit/http_header_test.cpp
+#  ${TEST}/net/unit/http_status_codes_test.cpp
+#  ${TEST}/net/unit/http_method_test.cpp
+#  ${TEST}/net/unit/http_mime_types_test.cpp
+#  ${TEST}/net/unit/http_request_test.cpp
+#  ${TEST}/net/unit/http_response_test.cpp
+#  ${TEST}/net/unit/http_time_test.cpp
+#  ${TEST}/net/unit/http_version_test.cpp
+#  ${TEST}/net/unit/interfaces_test.cpp
+#  ${TEST}/net/unit/ip4_addr.cpp
+#  ${TEST}/net/unit/ip4.cpp
+#  ${TEST}/net/unit/ip4_packet_test.cpp
+#  ${TEST}/net/unit/ip6.cpp
+#  ${TEST}/net/unit/ip6_addr.cpp
+#  ${TEST}/net/unit/ip6_addr_list_test.cpp
+#  ${TEST}/net/unit/ip6_packet_test.cpp
+#  ${TEST}/net/unit/nat_test.cpp
+#  ${TEST}/net/unit/napt_test.cpp
+#  ${TEST}/net/unit/packets.cpp
+#  ${TEST}/net/unit/path_mtu_discovery.cpp
+#  ${TEST}/net/unit/port_util_test.cpp
+#  ${TEST}/net/unit/router_test.cpp
+#  ${TEST}/net/unit/socket.cpp
+#  ${TEST}/net/unit/stateful_addr_test.cpp
+#  ${TEST}/net/unit/tcp_benchmark.cpp
+#  ${TEST}/net/unit/tcp_packet_test.cpp
+#  ${TEST}/net/unit/tcp_read_buffer_test.cpp
+#  ${TEST}/net/unit/tcp_read_request_test.cpp
+#  ${TEST}/net/unit/tcp_write_queue.cpp
+#  ${TEST}/net/unit/websocket.cpp
+#  ${TEST}/posix/unit/fd_map_test.cpp
+#  ${TEST}/posix/unit/inet_test.cpp
+#  ${TEST}/posix/unit/unit_fd.cpp
+#  ${TEST}/util/unit/base64.cpp
+#  ${TEST}/util/unit/bitops.cpp
+#  #${TEST}/util/unit/buddy_alloc_test.cpp
+#  ${TEST}/util/unit/config.cpp
+#  ${TEST}/util/unit/crc32.cpp
+#  ${TEST}/util/unit/delegate.cpp
+#  ${TEST}/util/unit/fixed_list_alloc_test.cpp
+#  ${TEST}/util/unit/fixed_queue.cpp
+#  ${TEST}/util/unit/fixed_vector.cpp
+#  ${TEST}/util/unit/isotime.cpp
+#  ${TEST}/util/unit/logger_test.cpp
+#  ${TEST}/util/unit/membitmap.cpp
+#  #${TEST}/util/unit/path_to_regex_no_options.cpp
+#  ${TEST}/util/unit/path_to_regex_parse.cpp
+#  ${TEST}/util/unit/path_to_regex_options.cpp
+#  ${TEST}/util/unit/percent_encoding_test.cpp
+#  ${TEST}/util/unit/pmr_alloc_test.cpp
+#  ${TEST}/util/unit/ringbuffer.cpp
+#  ${TEST}/util/unit/sha1.cpp
+#  ${TEST}/util/unit/statman.cpp
+#  ${TEST}/util/unit/syslogd_test.cpp
+#  ${TEST}/util/unit/syslog_facility_test.cpp
+#  ${TEST}/util/unit/uri_test.cpp
+#  ${TEST}/util/unit/lstack/test_lstack_nodes.cpp
+#  ${TEST}/util/unit/lstack/test_lstack_merging.cpp
+#  ${TEST}/util/unit/lstack/test_lstack_nomerge.cpp
 )
 
 # Disable (don't build) currently non-working tests on macOS
@@ -257,20 +218,115 @@ if (CPPCHECK)
   endif()
 endif()
 
-add_subdirectory(../src os)
-add_subdirectory(../lib/LiveUpdate liveupdate)
 add_library(lest_util ${LEST_UTIL})
+target_link_libraries(lest_util PUBLIC
+    lest
+    GSL
+    includeos_api
+    includeos_libcxx
+    includeos_libc
+)
+
+target_compile_options(lest_util PRIVATE -Wno-unused-parameter -Wno-unused-variable -Wno-return-type)
+target_compile_definitions(lest_util PRIVATE lest_FEATURE_AUTO_REGISTER HAVE_LEST_MAIN)
+target_include_directories(lest_util PRIVATE lest_util)
+
+add_library(os_mock
+    lest_util/os_mock.cpp
+)
+
+target_link_libraries(os_mock PUBLIC
+    includeos_api
+    includeos_libcxx
+    includeos_libc
+    #includeos_platform
+)
+target_compile_definitions(os_mock PRIVATE INCLUDEOS_DO_NOT_IMPLEMENT_OS_MOCK)
+#target_link_libraries(lest_util PUBLIC lest GSL)
+#target_link_libraries(lest_util PRIVATE os_no_mock)
+#target_compile_options(lest_util PRIVATE -Wno-unused-parameter -Wno-unused-variable -Wno-return-type)
 
 file(COPY memdisk.fat DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+#TODO remove the need for this or move at toplevel CMake file
+#required because libcxx has a static string array for locale weekdays
+#could c++20 allow constexpr here ? to test ...
+add_library(dso_handle dso_handle.cpp)
+target_link_libraries(cxx_static PRIVATE dso_handle)
+
+add_library(includeos_test INTERFACE)
+target_compile_options(includeos_test INTERFACE -nostdinc -Werror)
+target_link_options(includeos_test INTERFACE -nostdlib -nodefaultlibs)
+target_link_libraries(includeos_test INTERFACE ${muslBinaryDir}/lib/crt1.o includeos_libc)
+
+add_executable(helloworld helloworld.cpp)
+target_link_libraries(helloworld PRIVATE includeos_test)
+target_link_libraries(helloworld PRIVATE
+    includeos_libcxx
+    includeos_libcxxabi
+    dso_handle
+#    -Wl,--start-group
+#    includeos_platform
+#    arch
+#    kernel
+#    util
+#    -Wl,--end-group
+)
+
+add_executable(zero zero.cpp)
+target_link_libraries(zero PRIVATE includeos_test)
+
+add_executable(throw throw.cpp)
+target_link_libraries(throw PRIVATE includeos_test)
+target_link_libraries(throw PRIVATE
+    includeos_libcxxabi
+    #    -Wl,--start-group
+    #    includeos_platform
+    #    arch
+    #    kernel
+    #    util
+    #    -Wl,--end-group
+    )
+
+
+#target_link_libraries(helloworld PRIVATE crt)
+#target_link_libraries(helloworld PRIVATE kernel)
+#target_link_libraries(helloworld PRIVATE os_mock)
+
+#function(add_includeos_test)
+#  set(oneValueArgs NAME)
+#  cmake_parse_arguments(add_includeos_test "${oneValueArgs}")
+#  add_executable(${add_includeos_test_NAME})
+#endfunction()
 
 SET(TEST_BINARIES)
 foreach(T ${TEST_SOURCES})
   #CTest style
-  #get the filename witout extension
+  #get the filename without extension
   get_filename_component(NAME ${T} NAME_WE)
   add_executable(${NAME} ${T})
-  target_link_libraries(${NAME} liveupdate os lest_util os m stdc++ ${CONAN_LIB_DIRS_HTTP-PARSER}/http_parser.o)
+  target_link_libraries(${NAME} PRIVATE
+          lest_util
+          os_mock
+          #os_no_mock
+          fs
+          util
+          #liveupdate
+          net
+          kernel
+          hal
+          x86_64_pc
+          hw
+          arch
+          http-parser
+          musl_syscalls)
   add_test(${NAME} bin/${NAME})
+  target_compile_options(${NAME} PRIVATE -c)
+  target_compile_options(${NAME} PRIVATE -Wno-unused-variable -Wno-unused-result -Wno-sign-compare)
+  target_compile_definitions(${NAME} PRIVATE SERVICE_NAME="${NAME}")
+  target_compile_definitions(${NAME} PRIVATE SERVICE="${NAME}")
+  target_compile_definitions(${NAME} PRIVATE _LIVEUPDATE_MEMSIZE_=0)
+  target_sources(${NAME} PRIVATE ../src/service_name.cpp)
   #add to list of tests for dependencies
   list(APPEND TEST_BINARIES ${NAME})
 endforeach()

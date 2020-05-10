@@ -11,3 +11,8 @@ if (NOT CMAKE_TESTING_ENABLED)
   )
 endif()
 add_library(posix OBJECT ${SRCS})
+target_link_libraries(posix PRIVATE
+    includeos_impl
+    includeos_libcxx
+    includeos_libc
+)

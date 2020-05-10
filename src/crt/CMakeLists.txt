@@ -7,6 +7,11 @@
     cxx_abi.cpp
     )
 add_library(crt OBJECT ${SRCS})
+target_link_libraries(crt PRIVATE
+    includeos_impl
+    includeos_libcxx
+    includeos_libc
+)
 
 # disable sanitizers on c_abi and cxx_abi, etc.
 set_source_files_properties(c_abi.c PROPERTIES COMPILE_FLAGS "-fno-sanitize=all")

@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <dirent.h>
 #include <sys/uio.h>
+#include <limits.h>
 
 ssize_t File_FD::read(void* p, size_t n)
 {

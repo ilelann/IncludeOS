@@ -88,46 +88,46 @@ namespace x86
   static std::vector<LM_IST> lm_ist;
   SMP_RESIZE_EARLY_GCTOR(lm_ist);
 
-  void ist_initialize_for_cpu(int cpu, uintptr_t stack)
-  {
-    typedef struct stack (*create_stack_func_t) (size_t, const char*);
-    create_stack_func_t create_stack = create_stack_virt;
-    if (cpu > 0) {
-		create_stack = create_stack_simple;
-	}
-
-    auto& ist = lm_ist.at(cpu);
-    std::memset(&ist.tss, 0, sizeof(AMD64_TSS));
-
-    auto st = create_stack(INTR_SIZE, "Intr stack");
-    ist.tss.ist1 = (uintptr_t) st.sp;
-    ist.intr = st.phys;
-
-    st = create_stack(NMI_SIZE, "NMI stack");
-    ist.tss.ist2 = (uintptr_t) st.sp;
-    ist.nmi = st.phys;
-
-    st = create_stack(DFI_SIZE, "DFI stack");
-    ist.tss.ist3 = (uintptr_t) st.sp;
-    ist.dfi = st.phys;
-
-    ist.tss.rsp0 = stack;
-    ist.tss.rsp1 = stack;
-    ist.tss.rsp2 = stack;
-
-    auto tss_addr = (uintptr_t) &ist.tss;
-
-    // entry #3 in the GDT is the Task selector
-    const int task_offset = 8 * (3 + cpu);
-    auto* tgd = (AMD64_TS*) &__gdt64_base_pointer.location[task_offset];
-    memset(tgd, 0, sizeof(AMD64_TS));
-    tgd->td_type = 0x9;
-    tgd->td_present = 1;
-    tgd->td_lolimit = sizeof(AMD64_TSS) - 1;
-    tgd->td_hilimit = 0;
-    tgd->td_lobase  = tss_addr & 0xFFFFFF;
-    tgd->td_hibase  = tss_addr >> 24;
-
-    __amd64_load_tr(task_offset);
-  }
+//  void ist_initialize_for_cpu(int cpu, uintptr_t stack)
+//  {
+//    typedef struct stack (*create_stack_func_t) (size_t, const char*);
+//    create_stack_func_t create_stack = create_stack_virt;
+//    if (cpu > 0) {
+//		create_stack = create_stack_simple;
+//	}
+//
+//    auto& ist = lm_ist.at(cpu);
+//    std::memset(&ist.tss, 0, sizeof(AMD64_TSS));
+//
+//    auto st = create_stack(INTR_SIZE, "Intr stack");
+//    ist.tss.ist1 = (uintptr_t) st.sp;
+//    ist.intr = st.phys;
+//
+//    st = create_stack(NMI_SIZE, "NMI stack");
+//    ist.tss.ist2 = (uintptr_t) st.sp;
+//    ist.nmi = st.phys;
+//
+//    st = create_stack(DFI_SIZE, "DFI stack");
+//    ist.tss.ist3 = (uintptr_t) st.sp;
+//    ist.dfi = st.phys;
+//
+//    ist.tss.rsp0 = stack;
+//    ist.tss.rsp1 = stack;
+//    ist.tss.rsp2 = stack;
+//
+//    auto tss_addr = (uintptr_t) &ist.tss;
+//
+//    // entry #3 in the GDT is the Task selector
+//    const int task_offset = 8 * (3 + cpu);
+//    auto* tgd = (AMD64_TS*) &__gdt64_base_pointer.location[task_offset];
+//    memset(tgd, 0, sizeof(AMD64_TS));
+//    tgd->td_type = 0x9;
+//    tgd->td_present = 1;
+//    tgd->td_lolimit = sizeof(AMD64_TSS) - 1;
+//    tgd->td_hilimit = 0;
+//    tgd->td_lobase  = tss_addr & 0xFFFFFF;
+//    tgd->td_hibase  = tss_addr >> 24;
+//
+//    __amd64_load_tr(task_offset);
+//  }
 }

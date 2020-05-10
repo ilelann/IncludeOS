@@ -1,5 +1,6 @@
 #include <smp_utils>
 #include <smp>
+#include <xmmintrin.h>
 
 void smp_spinlock::lock()
 {

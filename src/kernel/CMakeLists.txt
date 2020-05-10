@@ -1,9 +1,13 @@
+enable_language(ASM_NASM)
+
+set(CMAKE_ASM_NASM_COMPILE_OBJECT "<CMAKE_ASM_NASM_COMPILER> -felf64 -o <OBJECT> <SOURCE>")
+
 set(SRCS
     block.cpp
     cpuid.cpp
     elf.cpp
     events.cpp
-    fiber.cpp
+    #fiber.cpp
     memmap.cpp
     multiboot.cpp
     os.cpp
@@ -11,8 +15,8 @@ set(SRCS
     profile.cpp
     service_stub.cpp
     #scoped_profiler.cpp
-    smp_common.cpp
-    smp_utils.cpp
+    #smp_common.cpp
+    #smp_utils.cpp
 #    elf.cpp
   #  fiber.cpp
 #    profile.cpp
@@ -21,9 +25,9 @@ set(SRCS
     threads.cpp
     #tls.cpp
     rng.cpp
-    vga.cpp
+    #vga.cpp
     context.cpp
-    #context_asm.asm
+    context_asm.asm
     )
 if (NOT CMAKE_TESTING_ENABLED)
   list(APPEND SRCS
@@ -38,9 +42,15 @@ endif()
 
 if("${ARCH}" STREQUAL "x86_64" OR "${ARCH}" STREQUAL "i686")
   list(APPEND SRCS
-    context_asm.asm
+    #context_asm.asm
     scoped_profiler.cpp
   )
 endif()
 
 add_library(kernel OBJECT ${SRCS})
+target_link_libraries(kernel PRIVATE
+    includeos_impl
+    includeos_libcxx
+    includeos_libc
+    #arch
+)

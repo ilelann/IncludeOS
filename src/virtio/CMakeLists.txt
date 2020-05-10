@@ -7,3 +7,8 @@ if (NOT CMAKE_TESTING_ENABLED)
   )
 endif()
 add_library(virtio OBJECT ${SRCS})
+target_link_libraries(virtio PRIVATE
+    includeos_impl
+    includeos_libcxx
+    includeos_libc
+)

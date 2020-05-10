@@ -38,6 +38,7 @@ test/**/*.log
 CMakeFiles*
 CMakeCache*
 cmake_install.cmake
+cmake-build-*
 
 # Vim
 *.swp

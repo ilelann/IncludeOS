@@ -105,7 +105,7 @@ set(NAT_SRCS
     )
 
 set(SRCS
-    checksum.cpp
+    #checksum.cpp
     buffer_store.cpp
     inet.cpp
     interfaces.cpp
@@ -116,7 +116,7 @@ set(SRCS
     ws/websocket.cpp
 )
 
-#TODO figure out if cmake can do multilevel objects somehow
+#TODO figure out if cmake can do mulx   tilevel objects somehow
 #or maybe calling this will return a list of objects..
 SET(OBJLIST
         ${NET_SRCS}
@@ -134,8 +134,8 @@ if (NOT ${PLATFORM} STREQUAL "nano")
   list(APPEND OBJLIST ${HTTP_SRCS})
   if (NOT CMAKE_TESTING_ENABLED)
     list(APPEND OBJLIST
-      ${BOTAN_MODULES}
-      ${OPENSSL_MODULES}
+      #${BOTAN_MODULES}
+      #${OPENSSL_MODULES}
     )
     list(APPEND SRCS
       configure.cpp
@@ -145,3 +145,15 @@ endif()
 
 
 add_library(net OBJECT ${SRCS} ${OBJLIST})
+target_link_libraries(net PRIVATE
+    includeos_impl
+    rapidjson
+    http-parser
+    #botan
+    #s2n
+    #OpenSSL::SSL
+    includeos_libcxx
+    includeos_libc
+)
+
+target_compile_options(net PRIVATE -Wno-return-type -Wno-deprecated-declarations)

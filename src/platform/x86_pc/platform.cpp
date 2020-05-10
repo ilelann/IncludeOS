@@ -35,113 +35,113 @@ namespace x86 {
 namespace kernel {
 	Fixed_vector<delegate<void()>, 64> smp_global_init(Fixedvector_Init::UNINIT);
 }
-
-void __platform_init()
-{
-  // read ACPI tables
-  {
-    PROFILE("ACPI init");
-    x86::ACPI::init();
-  }
-
-  // resize up all PER-CPU structures
-  for (auto lambda : kernel::smp_global_init) { lambda(); }
-
-  // setup main thread after PER-CPU ctors
-  kernel::setup_main_thread(0);
-
-  // read SMBIOS tables
-  {
-    PROFILE("SMBIOS init");
-    x86::SMBIOS::init();
-  }
-
-  // enable fs/gs for local APIC
-  INFO("x86", "Setting up GDT, TLS, IST");
-  //initialize_gdt_for_cpu(0);
-#ifdef ARCH_x86_64
-  // setup Interrupt Stack Table
-  {
-    PROFILE("IST amd64");
-    x86::ist_initialize_for_cpu(0, 0x9D3F0);
-  }
-#endif
-
-  INFO("x86", "Initializing CPU 0");
-  {
-    PROFILE("CPU tables x86");
-    x86::initialize_cpu_tables_for_cpu(0);
-  }
-
-  {
-    PROFILE("Events init");
-    Events::get(0).init_local();
-  }
-
-  // setup APIC, APIC timer, SMP etc.
-  {
-    PROFILE("APIC init");
-    x86::APIC::init();
-  }
-
-  // enable interrupts
-  MYINFO("Enabling interrupts");
-  {
-    PROFILE("Enable interrupts");
-    asm volatile("sti");
-  }
-
-  // initialize and start registered APs found in ACPI-tables
-  {
-    PROFILE("SMP init");
-    x86::init_SMP();
-  }
-
-  // Setup kernel clocks
-  MYINFO("Setting up kernel clock sources");
-  {
-    PROFILE("Clocks init (x86)");
-    x86::Clocks::init();
-  }
-
-  if (os::cpu_freq().count() <= 0.0) {
-    kernel::state().cpu_khz = x86::Clocks::get_khz();
-  }
-  INFO2("+--> %f MHz", os::cpu_freq().count() / 1000.0);
-
-  // Note: CPU freq must be known before we can start timer system
-  // Initialize APIC timers and timer systems
-  // Deferred call to Service::ready() when calibration is complete
-  {
-    PROFILE("APIC timer calibrate");
-    x86::APIC_Timer::calibrate();
-  }
-
-  INFO2("Initializing drivers");
-  {
-    PROFILE("Initialize drivers");
-    extern kernel::ctor_t __driver_ctors_start;
-    extern kernel::ctor_t __driver_ctors_end;
-    kernel::run_ctors(&__driver_ctors_start, &__driver_ctors_end);
-  }
-
-  // Scan PCI buses
-  {
-    PROFILE("PCI bus scan");
-    hw::PCI_manager::init();
-  }
-  {
-	PROFILE("PCI device init")
-    // Initialize storage devices
-    hw::PCI_manager::init_devices(PCI::STORAGE);
-    kernel::state().block_drivers_ready = true;
-    // Initialize network devices
-    hw::PCI_manager::init_devices(PCI::NIC);
-  }
-
-  // Print registered devices
-  os::machine().print_devices();
-}
+//
+//void __platform_init()
+//{
+//  // read ACPI tables
+//  {
+//    PROFILE("ACPI init");
+//    x86::ACPI::init();
+//  }
+//
+//  // resize up all PER-CPU structures
+//  for (auto lambda : kernel::smp_global_init) { lambda(); }
+//
+//  // setup main thread after PER-CPU ctors
+//  kernel::setup_main_thread(0);
+//
+//  // read SMBIOS tables
+//  {
+//    PROFILE("SMBIOS init");
+//    x86::SMBIOS::init();
+//  }
+//
+//  // enable fs/gs for local APIC
+//  INFO("x86", "Setting up GDT, TLS, IST");
+//  //initialize_gdt_for_cpu(0);
+//#ifdef ARCH_x86_64
+//  // setup Interrupt Stack Table
+//  {
+//    PROFILE("IST amd64");
+//    x86::ist_initialize_for_cpu(0, 0x9D3F0);
+//  }
+//#endif
+//
+//  INFO("x86", "Initializing CPU 0");
+//  {
+//    PROFILE("CPU tables x86");
+//    x86::initialize_cpu_tables_for_cpu(0);
+//  }
+//
+//  {
+//    PROFILE("Events init");
+//    Events::get(0).init_local();
+//  }
+//
+//  // setup APIC, APIC timer, SMP etc.
+//  {
+//    PROFILE("APIC init");
+//    x86::APIC::init();
+//  }
+//
+//  // enable interrupts
+//  MYINFO("Enabling interrupts");
+//  {
+//    PROFILE("Enable interrupts");
+//    asm volatile("sti");
+//  }
+//
+//  // initialize and start registered APs found in ACPI-tables
+//  {
+//    PROFILE("SMP init");
+//    x86::init_SMP();
+//  }
+//
+//  // Setup kernel clocks
+//  MYINFO("Setting up kernel clock sources");
+//  {
+//    PROFILE("Clocks init (x86)");
+//    x86::Clocks::init();
+//  }
+//
+//  if (os::cpu_freq().count() <= 0.0) {
+//    kernel::state().cpu_khz = x86::Clocks::get_khz();
+//  }
+//  INFO2("+--> %f MHz", os::cpu_freq().count() / 1000.0);
+//
+//  // Note: CPU freq must be known before we can start timer system
+//  // Initialize APIC timers and timer systems
+//  // Deferred call to Service::ready() when calibration is complete
+//  {
+//    PROFILE("APIC timer calibrate");
+//    x86::APIC_Timer::calibrate();
+//  }
+//
+//  INFO2("Initializing drivers");
+//  {
+//    PROFILE("Initialize drivers");
+//    extern kernel::ctor_t __driver_ctors_start;
+//    extern kernel::ctor_t __driver_ctors_end;
+//    kernel::run_ctors(&__driver_ctors_start, &__driver_ctors_end);
+//  }
+//
+//  // Scan PCI buses
+//  {
+//    PROFILE("PCI bus scan");
+//    hw::PCI_manager::init();
+//  }
+//  {
+//	PROFILE("PCI device init")
+//    // Initialize storage devices
+//    hw::PCI_manager::init_devices(PCI::STORAGE);
+//    kernel::state().block_drivers_ready = true;
+//    // Initialize network devices
+//    hw::PCI_manager::init_devices(PCI::NIC);
+//  }
+//
+//  // Print registered devices
+//  os::machine().print_devices();
+//}
 
 #ifdef ARCH_i686
 static x86::GDT gdt;

@@ -39,8 +39,8 @@ char _ELF_SYM_START_;
 
 /// RTC ///
 #include <rtc>
-RTC::timestamp_t RTC::booted_at = 0;
-void RTC::init() {}
+//RTC::timestamp_t RTC::booted_at = 0;
+//void RTC::init() {}
 
 #include <service>
 const char* service_binary_name__ = "Service binary name";
@@ -70,21 +70,21 @@ printf("%s", str);
 #include <hal/machine.hpp>
 //void OS::start(unsigned, unsigned) {}
 //void os::default_stdout(const char*, size_t) {}
-void os::event_loop() {}
-void os::halt() noexcept {}
-void os::reboot() noexcept {}
+//void os::event_loop() {}
+//void os::halt() noexcept {}
+//void os::reboot() noexcept {}
 
 void __x86_init_paging(void*){};
 namespace x86 {
 namespace paging {
-  void invalidate(void* pageaddr){};
+  void invalidate(void* /*pageaddr*/){};
 }}
 
 //void OS::multiboot(unsigned) {}
 
 #include <system_log>
-void SystemLog::initialize() {}
-void SystemLog::set_flags(uint32_t) {}
+//void SystemLog::initialize() {}
+//void SystemLog::set_flags(uint32_t) {}
 
 /// Kernel ///
 char _binary_apic_boot_bin_end;
@@ -105,12 +105,12 @@ uintptr_t _TEXT_END_;
 uintptr_t _EXEC_END_;
 
 extern "C" {
-  uintptr_t get_cpu_esp() {
-    return 0xdeadbeef;
-  }
+//uintptr_t get_cpu_esp() {
+//  return 0xdeadbeef;
+// }
 
 /// C ABI ///
-  void _init_c_runtime() {}
+//void _init_c_runtime() {}
   void _init_bss() {}
 
 #ifdef __MACH__
@@ -148,26 +148,26 @@ extern "C" {
 /// platform ///
 void* __multiboot_addr;
 
-void __platform_init() {}
-extern "C" void __init_sanity_checks() {}
-extern "C" void kernel_sanity_checks() {}
+//void __platform_init() {}
+//extern "C" void __init_sanity_checks() {}
+//extern "C" void kernel_sanity_checks() {}
 
 /// arch ///
-void __arch_poweroff() {}
-void __arch_reboot() {}
-void __arch_subscribe_irq(uint8_t) {}
-void __arch_enable_legacy_irq(uint8_t) {}
-void __arch_disable_legacy_irq(uint8_t) {}
-void __arch_system_deactivate() {}
+//void __arch_poweroff() {}
+//void __arch_reboot() {}
+//void __arch_subscribe_irq(uint8_t) {}
+//void __arch_enable_legacy_irq(uint8_t) {}
+//void __arch_disable_legacy_irq(uint8_t) {}
+//void __arch_system_deactivate() {}
 
 delegate<uint64_t()> systime_override = [] () -> uint64_t { return 0; };
-uint64_t __arch_system_time() noexcept {
-  return systime_override();
-}
+//uint64_t __arch_system_time() noexcept {
+//  return systime_override();
+//}
 #include <sys/time.h>
-timespec __arch_wall_clock() noexcept {
-  return timespec{static_cast<long>(systime_override()), 0};
-}
+//timespec __arch_wall_clock() noexcept {
+//  return timespec{static_cast<long>(systime_override()), 0};
+//}
 #include <random>
 uint32_t __arch_rand32()
 {
@@ -182,13 +182,15 @@ uint32_t __arch_rand32()
 int SMP::cpu_id() noexcept {
   return 0;
 }
-void SMP::global_lock() noexcept {}
-void SMP::global_unlock() noexcept {}
-void SMP::add_task(SMP::task_func func, int) { func(); }
-void SMP::signal(int) {}
+//void SMP::global_lock() noexcept {}
+//void SMP::global_unlock() noexcept {}
+//void SMP::add_task(SMP::task_func func, int) { func(); }
+//void SMP::signal(int) {}
 
 extern "C"
-void (*current_eoi_mechanism) () = nullptr;
+void (*current_eoi_mechanism) ()
+//= nullptr
+;
 
 #ifdef ARCH_X86
 #include "../../src/arch/x86/apic.hpp"
@@ -215,54 +217,54 @@ namespace os {
     return *m;
   }
 
-  const char* cmdline_args() noexcept {
-    return "unittests";
-  }
+//  const char* cmdline_args() noexcept {
+//    return "unittests";
+//  }
 
-  void print(const char* ptr, const size_t len) {
-    // print?
-  }
+//  void print(const char* /*ptr*/, const size_t /*len*/) {
+//    // print?
+//  }
 
-  size_t total_memuse() noexcept {
-    return 0xff00ff00;
-  }
+//  size_t total_memuse() noexcept {
+//    return 0xff00ff00;
+//  }
 }
 
-uintptr_t __exec_begin = 0xa00000;
-uintptr_t __exec_end   = 0xb0000b;
+//uintptr_t __exec_begin = 0xa00000;
+//uintptr_t __exec_end   = 0xb0000b;
 
 namespace kernel {
   uintptr_t heap_begin() noexcept {
     return 0;
   }
 
-  uintptr_t heap_end() noexcept {
-    return 1 << 30;
-  }
+//  uintptr_t heap_end() noexcept {
+//    return 1 << 30;
+//  }
 
-  uintptr_t heap_max() noexcept {
-    return -1;
-  }
+//  uintptr_t heap_max() noexcept {
+//    return -1;
+//  }
 
-  size_t heap_usage() noexcept {
-    return 0xff00ff00;
-  }
+//  size_t heap_usage() noexcept {
+//    return 0xff00ff00;
+//  }
 
-  size_t total_memuse() noexcept {
-    return heap_end();
-  }
+//  size_t total_memuse() noexcept {
+//    return heap_end();
+//  }
 
-  void init_heap(uintptr_t, size_t) noexcept {
-    INFO("TEST", "Initializing heap");
-  }
+//  void init_heap(uintptr_t, size_t) noexcept {
+//    INFO("TEST", "Initializing heap");
+//  }
 
-  struct State {};
-
-
-  State& state() {
-    static State s{};
-    return s;
-  }
+//  struct State {};
+//
+//
+//  State& state() {
+//    static State s{};
+//    return s;
+//  }
 }
 
 #endif

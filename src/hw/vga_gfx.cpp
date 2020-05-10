@@ -86,12 +86,12 @@ void VGA_gfx::write_regs(uint8_t regs[])
   }
   /* unlock CRTC registers */
   hw::outb(VGA_CRTC_INDEX, 0x03);
-  hw::outb(VGA_CRTC_DATA, hw::inb(VGA_CRTC_DATA) | 0x80);
+  hw::outb(VGA_CRTC_DATA, hw::inb(VGA_CRTC_DATA) | 0x80u);
   hw::outb(VGA_CRTC_INDEX, 0x11);
-  hw::outb(VGA_CRTC_DATA, hw::inb(VGA_CRTC_DATA) & ~0x80);
+  hw::outb(VGA_CRTC_DATA, hw::inb(VGA_CRTC_DATA) & ~0x80u);
   /* make sure they remain unlocked */
-  regs[0x03] |= 0x80;
-  regs[0x11] &= ~0x80;
+  regs[0x03] |= 0x80u;
+  regs[0x11] &= ~0x80u;
   /* write CRTC regs */
   for (int i = 0; i < VGA_NUM_CRTC_REGS; i++)
   {
@@ -144,9 +144,9 @@ void VGA_gfx::set_palette(const uint32_t colors[256])
   hw::outb(0x03c8, 0x0);
   for (int c = 0; c < 256; c++)
   {
-    hw::outb(0x3c9, (colors[c] >>  2) & 0x3F);
-    hw::outb(0x3c9, (colors[c] >> 10) & 0x3F);
-    hw::outb(0x3c9, (colors[c] >> 18) & 0x3F);
+    hw::outb(0x3c9, (colors[c] >>  2u) & 0x3Fu);
+    hw::outb(0x3c9, (colors[c] >> 10u) & 0x3Fu);
+    hw::outb(0x3c9, (colors[c] >> 18u) & 0x3Fu);
   }
 }
 void VGA_gfx::set_palette(const uint8_t idx, int r, int g, int b)
@@ -163,14 +163,14 @@ void VGA_gfx::set_pal24(const uint8_t idx, const uint32_t color)
 	// select color index
 	hw::outb(0x03c8, idx);
 	// write 18-bit color
-	hw::outb(0x3c9, (color >>  2) & 0x3F);
-	hw::outb(0x3c9, (color >> 10) & 0x3F);
-	hw::outb(0x3c9, (color >> 18) & 0x3F);
+	hw::outb(0x3c9, (color >>  2u) & 0x3Fu);
+	hw::outb(0x3c9, (color >> 10u) & 0x3Fu);
+	hw::outb(0x3c9, (color >> 18u) & 0x3Fu);
 }
 
 void VGA_gfx::apply_default_palette()
 {
-  #define rgb(r, g, b) (r | (g << 8) | (b << 16))
+  #define rgb(r, g, b) (uint32_t{r} | (uint32_t{g} << 8u) | (uint32_t{b} << 16u))
   const uint32_t palette[256] =
   {
     rgb(  0,  0,  0),

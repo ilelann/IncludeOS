@@ -7,7 +7,7 @@ set(SRCS
     syslogd.cpp
     percent_encoding.cpp
     path_to_regex.cpp
-    crc32.cpp
+    #crc32.cpp
 )
 
 #if (NOT CMAKE_TESTING_ENABLED)
@@ -19,10 +19,18 @@ if (NOT ${PLATFORM} STREQUAL "nano")
     uri.cpp #rapidjson
     autoconf.cpp
     config.cpp
-    statman_liu.cpp
+    #statman_liu.cpp
   )
 endif()
 
 
 
 add_library(util OBJECT ${SRCS})
+target_link_libraries(util PRIVATE
+    includeos_impl
+    uzlib
+    rapidjson
+    http-parser
+    includeos_libc
+    includeos_libcxx
+)

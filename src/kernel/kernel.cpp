@@ -61,10 +61,12 @@ void os::register_plugin(Plugin delg, const char* name){
 }
 
 extern void __arch_reboot();
+
 void os::reboot() noexcept
 {
   __arch_reboot();
 }
+
 void os::shutdown() noexcept
 {
   kernel::state().running = false;
@@ -113,12 +115,12 @@ void kernel::post_start()
   }
 
   // begin service start
-  FILLINE('=');
-  printf(" IncludeOS %s (%s / %u-bit)\n",
-         os::version(), os::arch(),
-         static_cast<unsigned>(sizeof(uintptr_t)) * 8);
-  printf(" +--> Running [ %s ]\n", Service::name());
-  FILLINE('~');
+//  FILLINE('=');
+//  printf(" IncludeOS %s (%s / %u-bit)\n",
+//         os::version(), os::arch(),
+//         static_cast<unsigned>(sizeof(uintptr_t)) * 8);
+//  printf(" +--> Running [ %s ]\n", Service::name());
+//  FILLINE('~');
 
   // if we have disabled important checks, its unsafe for production
 #if defined(LIBFUZZER_ENABLED) || defined(ARP_PASSTHROUGH) || defined(DISABLE_INET_CHECKSUMS)
@@ -167,6 +169,8 @@ static inline bool contains(const char* str, size_t len, char c)
   return false;
 }
 
+#ifndef INCLUDEOS_DO_NOT_IMPLEMENT_OS_MOCK
+
 void os::print(const char* str, const size_t len)
 {
   if (UNLIKELY(! kernel::libc_initialized())) {
@@ -198,6 +202,8 @@ void os::print(const char* str, const size_t len)
     }
   }
 }
+
+#endif
 
 void os::print_timestamps(const bool enabled)
 {

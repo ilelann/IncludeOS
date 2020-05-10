@@ -4,7 +4,7 @@ set(SRCS
     nic.cpp
     ps2.cpp
     serial.cpp
-    vga_gfx.cpp
+    #vga_gfx.cpp
     msi.cpp
     pci_msi.cpp
     usernet.cpp
@@ -12,3 +12,8 @@ set(SRCS
 
 
 add_library(hw OBJECT ${SRCS})
+target_link_libraries(hw PRIVATE
+    includeos_impl
+    includeos_libcxx
+    includeos_libc
+)

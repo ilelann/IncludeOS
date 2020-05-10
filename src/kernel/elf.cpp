@@ -48,10 +48,6 @@ static std::string to_hex_string(N n)
   return std::string(buffer, len);
 }
 
-static ElfEhdr& elf_header() {
-  return *(ElfEhdr*) ELF_START;
-}
-
 struct SymTab {
   const ElfSym* base;
   uint32_t      entries;
@@ -140,11 +136,6 @@ public:
     return guess;
   }
 
-  size_t end_of_file() const {
-    auto& hdr = elf_header();
-    return hdr.e_ehsize + (hdr.e_phnum * hdr.e_phentsize) + (hdr.e_shnum * hdr.e_shentsize);
-  }
-
   const SymTab& get_symtab() const {
     return symtab;
   }
@@ -199,9 +190,6 @@ ElfTables& get_parser() {
   return parser;
 }
 
-size_t Elf::end_of_file() {
-  return get_parser().end_of_file();
-}
 const char* Elf::get_strtab() {
   return get_parser().get_strtab();
 }
@@ -419,39 +407,6 @@ void _init_elf_parser()
   else {
     // symbols and strings are stripped out
     parser.set(nullptr, 0, nullptr, 0,  0, 0);
-  }
-}
-
-extern "C"
-void elf_check_symbols_ok()
-{
-  extern char _ELF_SYM_START_;
-  auto* hdr = (elfsyms_header*) &_ELF_SYM_START_;
-  // verify CRC sanity check
-  const uint32_t temp_hdr = hdr->sanity_check;
-  hdr->sanity_check = 0;
-  const uint32_t our_sanity = crc32c(hdr, sizeof(elfsyms_header));
-  hdr->sanity_check = temp_hdr;
-  if (hdr->sanity_check != our_sanity)
-  {
-    kprintf("ELF syms header CRC failed! "
-            "(%08x vs %08x)\n", hdr->sanity_check, our_sanity);
-    return;
-  }
-
-  // verify separate checksums of symbols and strings
-  uint32_t symbsize = hdr->symtab_entries * sizeof(ElfSym);
-  uint32_t csum_syms = crc32c(hdr->syms, symbsize);
-  uint32_t csum_strs = crc32c(&hdr->syms[hdr->symtab_entries], hdr->strtab_size);
-  if (csum_syms != hdr->checksum_syms || csum_strs != hdr->checksum_strs)
-  {
-    if (csum_syms != hdr->checksum_syms)
-      kprintf("ELF symbol tables checksum failed! "
-              "(%08x vs %08x)\n", csum_syms, hdr->checksum_syms);
-    if (csum_strs != hdr->checksum_strs)
-      kprintf("ELF string tables checksum failed! "
-              "(%08x vs %08x)\n", csum_strs, hdr->checksum_strs);
-    return;
   }
 }
 

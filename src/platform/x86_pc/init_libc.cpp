@@ -7,7 +7,6 @@
 #include <kernel/rng.hpp>
 #include <kernel/service.hpp>
 #include <util/elf_binary.hpp>
-#include <version.h>
 #include <kprint>
 //#define ENABLE_PROFILERS
 #include <profile>

@@ -55,6 +55,7 @@ public:
   static size_t early_cpu_total() noexcept;
 };
 
+#ifndef INCLUDEOS_DO_NOT_IMPLEMENT_OS_MOCK
 inline int SMP::cpu_id() noexcept
 {
   int cpuid;
@@ -68,6 +69,7 @@ inline int SMP::cpu_id() noexcept
 #endif
   return cpuid;
 }
+#endif
 
 #include <array>
 template <typename T, size_t N>

@@ -145,7 +145,8 @@ void Statman::free(void* addr)
 
 ssize_t Statman::find_free_stat() const noexcept
 {
-  for (size_t i = 0; i < this->m_stats.size(); i++)
+  using size_type = decltype (this->m_stats.size());
+  for (size_type i = 0; i < this->m_stats.size(); i++)
   {
     if (m_stats[i].unused()) return i;
   }

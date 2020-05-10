@@ -45,6 +45,7 @@ set(DRIVERS "")
 foreach(DRIVER ${DRIVER_SRCS})
   get_filename_component(DRIVER_NAME ${DRIVER} NAME_WE)
   add_library(${DRIVER_NAME} STATIC ${DRIVER})
+  target_link_libraries(${DRIVER_NAME} PRIVATE GSL)
   list(APPEND DRIVERS ${DRIVER_NAME})
 endforeach()
 
@@ -62,7 +63,9 @@ set_target_properties(${DRIVERS}
 install(TARGETS ${DRIVERS} DESTINATION drivers)
 # Simple stuff
 add_library(vga_output STATIC stdout/vgaout.cpp)
+target_link_libraries(vga_output PRIVATE GSL)
 add_library(default_stdout STATIC stdout/default_stdout.cpp)
+target_link_libraries(default_stdout PRIVATE GSL)
 # TODO DELETE
 #add_library(vga_emergency STATIC vga_emergency.cpp)
 

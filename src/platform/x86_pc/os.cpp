@@ -57,99 +57,99 @@ extern kernel::ctor_t __stdout_ctors_end;
 extern void __arch_init_paging();
 extern void __platform_init();
 extern void elf_protect_symbol_areas();
-
-void kernel::start(uint32_t boot_magic, uint32_t boot_addr)
-{
-  PROFILE("OS::start");
-  kernel::state().cmdline = Service::binary_name();
-
-  // Initialize stdout handlers
-  if (os_default_stdout) {
-    os::add_stdout(&kernel::default_stdout);
-  }
-
-  kernel::run_ctors(&__stdout_ctors_start, &__stdout_ctors_end);
-
-  // Print a fancy header
-  CAPTION("#include<os> // Literally");
-
-  int stack;
-  MYINFO("Stack: %p", &stack);
-  MYINFO("Boot magic: 0x%x, addr: 0x%x", boot_magic, boot_addr);
-
-  // PAGING //
-  {
-    PROFILE("Enable paging");
-    __arch_init_paging();
-  }
-
-  // BOOT METHOD //
-  {
-  PROFILE("Multiboot / legacy");
-  // Detect memory limits etc. depending on boot type
-  if (boot_magic == MULTIBOOT_BOOTLOADER_MAGIC) {
-    kernel::multiboot(boot_addr);
-  } else {
-
-    if (kernel::is_softreset_magic(boot_magic) && boot_addr != 0)
-      kernel::resume_softreset(boot_addr);
-
-    kernel::legacy_boot();
-  }
-  assert(kernel::memory_end() != 0);
-  }
-
-  MYINFO("Total memory detected as %s ", util::Byte_r(kernel::memory_end()).to_string().c_str());
-
-  // Give the rest of physical memory to heap
-  kernel::state().heap_max = kernel::memory_end() - 1;
-  assert(kernel::heap_begin() != 0x0 and kernel::heap_max() != 0x0);
-
-  // Assign memory ranges used by the kernel
-  auto& memmap = os::mem::vmmap();
-  INFO2("Assigning fixed memory ranges (Memory map)");
-
-  // protect symbols early on (the calculation is complex so not doing it here)
-  {
-    PROFILE("Protect symbols");
-    elf_protect_symbol_areas();
-  }
-
-#if defined(ARCH_x86_64)
-  // protect the basic pagetable used by LiveUpdate and any other
-  // systems that need to exit long/protected mode
-  os::mem::map({0x1000, 0x1000, os::mem::Access::read, 0x7000}, "Page tables");
-  memmap.assign_range({0x10000, 0x9d3ff, "Stack"});
-#elif defined(ARCH_i686)
-  memmap.assign_range({0x10000, 0x9d3ff, "Stack"});
-#endif
-
-  // heap (physical) area
-  uintptr_t span_max = std::numeric_limits<std::ptrdiff_t>::max();
-  uintptr_t heap_range_max_ = std::min(span_max, kernel::heap_max());
-
-  INFO2("* Assigning heap 0x%zx -> 0x%zx", kernel::heap_begin(), heap_range_max_);
-  memmap.assign_range({kernel::heap_begin(), heap_range_max_,
-        "Dynamic memory", kernel::heap_usage });
-
-  MYINFO("Virtual memory map");
-  {
-    PROFILE("Print memory map");
-    for (const auto& entry : memmap)
-        INFO2("%s", entry.second.to_string().c_str());
-  }
-
-  {
-    PROFILE("Platform init");
-  	__platform_init();
-  }
-
-  // Realtime/monotonic clock
-  {
-    PROFILE("RTC init");
-    RTC::init();
-  }
-}
+//
+//void kernel::start(uint32_t boot_magic, uint32_t boot_addr)
+//{
+//  PROFILE("OS::start");
+//  kernel::state().cmdline = Service::binary_name();
+//
+//  // Initialize stdout handlers
+//  if (os_default_stdout) {
+//    os::add_stdout(&kernel::default_stdout);
+//  }
+//
+//  kernel::run_ctors(&__stdout_ctors_start, &__stdout_ctors_end);
+//
+//  // Print a fancy header
+//  CAPTION("#include<os> // Literally");
+//
+//  int stack;
+//  MYINFO("Stack: %p", &stack);
+//  MYINFO("Boot magic: 0x%x, addr: 0x%x", boot_magic, boot_addr);
+//
+//  // PAGING //
+//  {
+//    PROFILE("Enable paging");
+//    __arch_init_paging();
+//  }
+//
+//  // BOOT METHOD //
+//  {
+//  PROFILE("Multiboot / legacy");
+//  // Detect memory limits etc. depending on boot type
+//  if (boot_magic == MULTIBOOT_BOOTLOADER_MAGIC) {
+//    kernel::multiboot(boot_addr);
+//  } else {
+//
+//    if (kernel::is_softreset_magic(boot_magic) && boot_addr != 0)
+//      kernel::resume_softreset(boot_addr);
+//
+//    kernel::legacy_boot();
+//  }
+//  assert(kernel::memory_end() != 0);
+//  }
+//
+//  MYINFO("Total memory detected as %s ", util::Byte_r(kernel::memory_end()).to_string().c_str());
+//
+//  // Give the rest of physical memory to heap
+//  kernel::state().heap_max = kernel::memory_end() - 1;
+//  assert(kernel::heap_begin() != 0x0 and kernel::heap_max() != 0x0);
+//
+//  // Assign memory ranges used by the kernel
+//  auto& memmap = os::mem::vmmap();
+//  INFO2("Assigning fixed memory ranges (Memory map)");
+//
+//  // protect symbols early on (the calculation is complex so not doing it here)
+//  {
+//    PROFILE("Protect symbols");
+//    elf_protect_symbol_areas();
+//  }
+//
+//#if defined(ARCH_x86_64)
+//  // protect the basic pagetable used by LiveUpdate and any other
+//  // systems that need to exit long/protected mode
+//  os::mem::map({0x1000, 0x1000, os::mem::Access::read, 0x7000}, "Page tables");
+//  memmap.assign_range({0x10000, 0x9d3ff, "Stack"});
+//#elif defined(ARCH_i686)
+//  memmap.assign_range({0x10000, 0x9d3ff, "Stack"});
+//#endif
+//
+//  // heap (physical) area
+//  uintptr_t span_max = std::numeric_limits<std::ptrdiff_t>::max();
+//  uintptr_t heap_range_max_ = std::min(span_max, kernel::heap_max());
+//
+//  INFO2("* Assigning heap 0x%zx -> 0x%zx", kernel::heap_begin(), heap_range_max_);
+//  memmap.assign_range({kernel::heap_begin(), heap_range_max_,
+//        "Dynamic memory", kernel::heap_usage });
+//
+//  MYINFO("Virtual memory map");
+//  {
+//    PROFILE("Print memory map");
+//    for (const auto& entry : memmap)
+//        INFO2("%s", entry.second.to_string().c_str());
+//  }
+//
+//  {
+//    PROFILE("Platform init");
+//  	__platform_init();
+//  }
+//
+//  // Realtime/monotonic clock
+//  {
+//    PROFILE("RTC init");
+//    RTC::init();
+//  }
+//}
 
 extern void __arch_poweroff();
 

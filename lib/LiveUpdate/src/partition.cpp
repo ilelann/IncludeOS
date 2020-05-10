@@ -7,6 +7,7 @@
 #include <util/crc32.hpp>
 #include <cassert>
 #include <cstring>
+#include <stdexcept>
 extern bool LIVEUPDATE_EXTRA_CHECKS;
 
 inline uint32_t liu_crc32(const void* buf, size_t len)

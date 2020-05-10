@@ -51,10 +51,14 @@ uint32_t SystemLog::get_flags()
   return get_log_buffer().flags;
 }
 
+#ifndef INCLUDEOS_DO_NOT_IMPLEMENT_OS_MOCK
+
 void SystemLog::set_flags(uint32_t new_flags)
 {
   get_log_buffer().flags |= new_flags;
 }
+
+#endif
 
 void SystemLog::clear_flags()
 {
@@ -80,6 +84,8 @@ std::vector<char> SystemLog::copy()
   syslog_lock.unlock();
   return copy;
 }
+
+#ifndef INCLUDEOS_DO_NOT_IMPLEMENT_OS_MOCK
 
 void SystemLog::initialize()
 {
@@ -133,6 +139,8 @@ void SystemLog::initialize()
   // copy from temp RB
   SystemLog::write(temp_mrb.sequentialize(), temp_mrb.size());
 }
+
+#endif
 
 __attribute__((constructor))
 static void system_log_gconstr()

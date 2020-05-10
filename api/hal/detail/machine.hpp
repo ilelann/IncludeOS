@@ -245,6 +245,8 @@ namespace os::detail
 
   inline void Machine::print_devices() const
   {
+// to prevent unused variable warnings
+#ifndef NO_INFO
     INFO("Machine", "Listing registered devices");
 
     for(const auto idx : device_types_)
@@ -259,6 +261,7 @@ namespace os::detail
 
     INFO2("|");
     INFO2("o");
+#endif
   }
 
 }

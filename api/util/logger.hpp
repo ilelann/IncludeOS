@@ -22,7 +22,7 @@ public:
 
 public:
 
-  Logger(Log& log, Log::index_type = 0);
+  Logger(Log& log, Log::size_type = 0);
 
   /**
    * @brief Log a string
